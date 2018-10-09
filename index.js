@@ -31,8 +31,8 @@ const MAX_BYTE_SIZE_PER_FILE = parseInt(process.env.MAX_BYTE_SIZE_PER_FILE, 10) 
 const LOG_DIR_NAME = process.env.LOG_DIR_NAME || null;
 const APPEND_POD_NAME_TO_FILE = (process.env.APPEND_POD_NAME_TO_FILE == 'true');
 const FILE_LOG_NAME = LOG_DIR_NAME ?
-    LOG_DIR_NAME + '/sf' + (APPEND_POD_NAME_TO_FILE ? '-' + HOST_NAME : '') + '.log'
-    : './logs/sf' + (APPEND_POD_NAME_TO_FILE ? '-' + HOST_NAME : '') + '.log';
+    LOG_DIR_NAME + '/spaenv' + (APPEND_POD_NAME_TO_FILE ? '-' + HOST_NAME : '') + '.log'
+    : './logs/spaenv' + (APPEND_POD_NAME_TO_FILE ? '-' + HOST_NAME : '') + '.log';
 
 
 /*=============================================
@@ -44,7 +44,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 // Daily rotate file transport for logs
 var transport = new winston.transports.DailyRotateFile({
     filename: FILE_LOG_NAME,
-    datePattern: 'yyyy-MM-dd-',
+    datePattern: 'yyyy-MM-DD',
     prepend: true,
     level: FILE_LOG_LEVEL,
     timestamp: true,
@@ -53,7 +53,7 @@ var transport = new winston.transports.DailyRotateFile({
 });
 
 // Winston Logger init
-var winstonLogger = new winston.Logger({
+var winstonLogger = winston.createLogger({
     level: FILE_LOG_LEVEL,
     transports: [
         new winston.transports.Console({ timestamp: true }),
@@ -62,7 +62,7 @@ var winstonLogger = new winston.Logger({
 });
 
 winstonLogger.error = function (err, context) {
-    winstonLogger.error(`SpaEnv logger error:` + err + `  context:` + context);
+    winstonLogger.error('SPA Env Server error:' + err + ' context:' + context);
 };
 
 // remove console if not in debug mode
@@ -91,18 +91,19 @@ if (args.length == 3 && args[2] == 'server') {
     var server = app.listen(SERVICE_PORT, SERVICE_IP, function() {
         var host = server.address().address;
         var port = server.address().port;
-        winstonLogger.info(`START log server (${HOST_NAME})-  loglevel(${FILE_LOG_LEVEL}) fileLocation(${FILE_LOG_NAME})`)
+        winstonLogger.info('START SPA Env Server host(' + HOST_NAME
+            + ') loglevel(' + FILE_LOG_LEVEL + ') fileLocation(' + FILE_LOG_NAME + ')');
     });
 }
 
 // handle posts to /env endpoint
 app.post('/env', function (req, res) {
-    getEnv(req).then(function (mess) {
+    getSPAEnvValue(req).then(function (envValue) {
         res.status(200);
-        return res.send(mess);
-    }).catch(function(mess) {
-        res.status(500);
-        return res.send(mess);
+        return res.send(envValue);
+    }).catch(function(envValue) {
+        res.status(403);
+        return res.send(envValue);
     });
 });
 
@@ -126,20 +127,20 @@ app.use(function (err, req, res, next) {
     winstonLogger.info(err, req);
     res.status(500).send('An error has occured: ' + err);
 });
-winstonLogger.info('Spa Env Server started on host: ' +  SERVICE_IP + '  port: ' + SERVICE_PORT);
+winstonLogger.info('SPA Env Server started on host: ' +  SERVICE_IP + '  port: ' + SERVICE_PORT);
 
 
 // get a log
-var getEnv = function (req) {
+var getSPAEnvValue = function (req) {
     return new Promise(function (resolve, reject) {
         var authorized = false;
 
-        if (USE_AUTH && req.get('Authorization') === `spaenv ${SERVICE_AUTH_TOKEN}`) {
+        if (USE_AUTH && req.get('Authorization') === 'spaenv ' + SERVICE_AUTH_TOKEN) {
             authorized = true;
         };
         if (authorized || !USE_AUTH) {
             // extract stuff
-            const mess = stringify(req.body);
+            const envName = req.get('SPA_ENV_NAME');
             const host = req.get('host') || '?'
             const logsource = req.get('logsource') || '?'
             const fhost = req.get('http_x_forwarded_host') || '?'
@@ -154,26 +155,34 @@ var getEnv = function (req) {
             const severity = req.get('severity') || '?' //orig
             const severityLabel = req.get('severity_label') || '?' //from screenshot
 
-            const logString = `program(${program}) mess(${mess}) host(${host}) logsource(${logsource}) fhost(${fhost}) severity(${severity}) method(${method}) times(${times}) browser(${browser}) sourceIP(${ip}), http_host(${http_host}) http_x_forwarded_for(${forwarded}) pod(${HOST_NAME})`;
+            const logString = 'program(' + program + ') envName(' + envName
+                + ') host(' + host + ') logsource(' + logsource + ') fhost(' + fhost
+                + ') severity(' + severity + ') method(' + method + ') times(' + times
+                + ') browser(' + browser + ') sourceIP(' + ip + ') http_host(' + http_host
+                + ') http_x_forwarded_for(' + forwarded + ') pod(' + HOST_NAME + ')';
 
             // write to local filesystem
             winstonLogger.info(logString);
 
-            return resolve('success');
+            // get the environment variable requested
+            if (envName && envName.length > 8 && envName.substring(0, 8) === 'SPA_ENV_') {
+                resolve(process.env[envName]);
+            }
+            else
+                reject('Forbidden');
         }
         else {
             winstonLogger.info('unauthorized');
             winstonLogger.debug('received with headers: ', req.headers);
-            reject('unauthorized');
+            reject('Forbidden');
         }
     }, function(err) {
         winstonLogger.info('error: ' + err);
-        // reject('unauthorized');
-        reject('something went wrong');
+        reject('Forbidden');
     });
 };
 
-exports.getEnv = getEnv;
+exports.getSPAEnvValue = getSPAEnvValue;
 
 
 function checkEnvBoolean(env){
