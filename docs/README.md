@@ -1,3 +1,4 @@
+
 # spa-env-server
 
 Serve environment variables of server to remote SPAs (no secrets! only public info).
@@ -25,9 +26,14 @@ Then run:
 
 To test:
 
- * curl -XPOST -H "Authorization: spaenv XXX" -H "Content-Type: application/json" -d '{"body": "xyz"}' localhost:5504/log
+ * curl -XPOST -H "Authorization: spaenv XXX" -H "Content-Type: application/json" -H 'SPA_ENV_NAME: SPA_ENV_MYENV' localhost:8080/env
 
  where XXX is the SERVICE_AUTH_TOKEN environment variable passed to the service.
+
+To audit:
+
+From a browser, hit localhost:8080/monitor and enter the username/password for the monitor as configured in the server.
+
 
 ## Configuration
 
@@ -55,6 +61,58 @@ To view and download local log files created by the server, go to URL of the rou
 
 The username and password should match the environment variables configured.
 
+## Production Setup
+
+See [Deploy to OpenShift](openshift/README.md) docs.
+
+
+## SPA Client
+
+An SPA client wishing to use this server will make an HTTP POST request to the host/port that the spa-env-server listens on.  Typically, the following environment values are used in the client:
+
+| Environment Variable  | Description |
+| --------------------- | ------------- |
+| ENV_SERVER_HOST (string)	| name of the SPA Env Server host. In OpenShift this is spa-env-server. Can be an IP address.|
+| ENV_SERVER_PORT (number)	| port for the service, Default: 8080|
+| ENV_AUTH_TOKEN (string)| 	security token used by clients to connect to Server|
+ 	 
+The client creates an http POST request.  An example of a function that posts a message string in javascript:
+
+```
+
+function postSPAEnvRequest (message) {
+
+var options = {
+  hostname: process.env.ENV_SERVER_HOST,
+  port: process.env.ENV_SERVER_PORT,
+  path: '/env',
+  method: 'POST',
+  headers: {
+     'Content-Type': 'application/json',
+     'Authorization': 'spaenv ' + process.env.ENV_AUTH_TOKEN,
+     'Content-Length': Buffer.byteLength(body),
+     'logsource': process.env.HOSTNAME,
+     'timestamp': moment().format('DD-MMM-YYYY'),
+     'program': 'name of the client application',
+     'serverity': 'error',
+     'SPA_ENV_NAME': 'SPA_ENV_MYENV'   <--- The important bit
+   }
+};
+
+etc..
+
+You can also send a JSON array of environment variable names and will receive in the response the array filled with the values found.  For example:
+
+'SPA_ENV_NAME': '{ "SPA_ENV_MYENV1": "", "SPA_ENV_MYENV2": "" }'
+
+IMPORTANT:  All the openshift variable names that are returned must start with SPA_ENV_, in order to deny access to environment variables not spefically designated.
+
+```
+ 
+
+Notice that all POSTs are made to the path "/env" of the spa-env-server.
+
+Also notice the format of the Authorization header as required.
 
 ## Production Setup
 
