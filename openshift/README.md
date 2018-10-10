@@ -1,10 +1,14 @@
 # Deploy to OpenShift
 
-## Runtime Setup
-TBD
+## Build 
+
+A Template is provided in openshift/templates/spa-env-server-build.json.  Use the template in your tools project with conjunction with the openshift/templates/spa-env-server-jenkins.json for the jenkins2 pipeline template. 
+
 
 ## Deployment
-TBD
+
+A Template is provided in openshift/templates/spa-env-server-deploy.json.  Use the template in your dev, test and prod environments.
+
 
 ### Change Propagation
 To promote runtime image from one environment to another, for example from *dev* to *test*, run
