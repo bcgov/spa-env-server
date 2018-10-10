@@ -67,55 +67,41 @@ An SPA client wishing to use this server will make an HTTP POST request to the h
 
 | Environment Variable  | Description |
 | --------------------- | ------------- |
-| SPA_ENV_SERVER_HOST (string)	| name of the SPA Env Server host. In OpenShift this is spa-env-server. Can be an IP address.|
-| SPA_ENV_SERVER_PORT (number)	| port for the service, Default: 8080|
-| SPA_ENV_AUTH_TOKEN (string)| 	security token used by clients to connect to Server|
+| ENV_SERVER_HOST (string)	| name of the SPA Env Server host. In OpenShift this is spa-env-server. Can be an IP address.|
+| ENV_SERVER_PORT (number)	| port for the service, Default: 8080|
+| ENV_AUTH_TOKEN (string)| 	security token used by clients to connect to Server|
  	 
 The client creates an http POST request.  An example of a function that posts a message string in javascript:
 
 ```
-TBD
 
-function getSpaEnv (message) {
-
-var body = JSON.stringify({
-   message: message
-})
+function postSPAEnvRequest (message) {
 
 var options = {
-  hostname: process.env.SPA_ENV_SERVER_HOST,
-  port: process.env.SPA_ENV_SERVER_PORT,
+  hostname: process.env.ENV_SERVER_HOST,
+  port: process.env.ENV_SERVER_PORT,
   path: '/env',
   method: 'POST',
   headers: {
      'Content-Type': 'application/json',
-     'Authorization': 'spaenv ' + process.env.SPA_ENV_AUTH_TOKEN,
+     'Authorization': 'spaenv ' + process.env.ENV_AUTH_TOKEN,
      'Content-Length': Buffer.byteLength(body),
      'logsource': process.env.HOSTNAME,
      'timestamp': moment().format('DD-MMM-YYYY'),
      'program': 'name of the client application',
-     'serverity': 'error'
+     'serverity': 'error',
+     'SPA_ENV_NAME': 'SPA_ENV_MYENV'   <--- The important bit
    }
 };
 
-var req = http.request(options, function (res) {
-   res.setEncoding('utf8');
-   res.on('data', function (chunk) {
-      console.log("Body chunk: " + JSON.stringify(chunk));
-   });
-   res.on('end', function () {
-      console.log('End of chunks');
-   });
-});
+etc..
 
-req.on('error', function (e) {
-   console.error("error sending to spa env server: " + e.message);
-});
+You can also send a JSON array of environment variable names and will receive in the response the array filled with the values found.  For example:
 
-// write data to request body
-req.write(body);
-req.end();
-}
+'SPA_ENV_NAME': '{ "SPA_ENV_MYENV1": "", "SPA_ENV_MYENV2": "" }'
+
+IMPORTANT:  All the openshift variable names that are returned must start with SPA_ENV_, in order to deny access to environment variables not spefically designated.
+
 ```
  
 

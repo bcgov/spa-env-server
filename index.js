@@ -165,8 +165,25 @@ var getSPAEnvValue = function (req) {
             winstonLogger.info(logString);
 
             // get the environment variable requested
+            // there are two cases:
+            // 1. A single env names with a name starting with SPA_ENV_
+            // 2. A json collection of env names with each name starting with SPA_ENV_
             if (envName && envName.length > 8 && envName.substring(0, 8) === 'SPA_ENV_') {
-                resolve(process.env[envName]);
+                if (! isEmpty(process.env[envName]))
+                    resolve(process.env[envName]);
+                else
+                    reject('Forbidden');
+            }
+            else if (envName && envName.length > 10 && envName.substring(0, 1) === '{') {
+                // json
+                var keys = JSON.parse(envName);
+                for (var key in keys) {
+                    if (keys.hasOwnProperty(key) && key.length > 8 && key.substring(0, 8) === 'SPA_ENV_') {
+                        if (! isEmpty(process.env[key]))
+                            keys[key] = process.env[key];
+                    }
+                }
+                resolve (keys);
             }
             else
                 reject('Forbidden');
@@ -187,4 +204,8 @@ exports.getSPAEnvValue = getSPAEnvValue;
 
 function checkEnvBoolean(env){
     return env && env.toLowerCase() === 'true';
+}
+
+function isEmpty(value) {
+    return typeof value == 'string' && !value.trim() || typeof value == 'undefined' || value == null || value === '';
 }
