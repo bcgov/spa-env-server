@@ -26,9 +26,14 @@ Then run:
 
 To test:
 
- * curl -XPOST -H "Authorization: spaenv XXX" -H "Content-Type: application/json" -d '{"body": "xyz"}' localhost:5504/log
+ * curl -XPOST -H "Authorization: spaenv XXX" -H "Content-Type: application/json" -H 'SPA_ENV_NAME: SPA_ENV_MYENV' localhost:8080/env
 
  where XXX is the SERVICE_AUTH_TOKEN environment variable passed to the service.
+
+To audit:
+
+From a browser, hit localhost:8080/monitor and enter the username/password for the monitor as configured in the server.
+
 
 ## Configuration
 
