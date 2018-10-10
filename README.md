@@ -47,6 +47,7 @@ These are:
 | SERVICE_PORT (number)         | port for the service, Default: 8080 | 
 | SERVICE_USE_AUTH  (boolean)   | spa env server uses a token to authorize connection from a service | 
 | SERVICE_AUTH_TOKEN   (string) | security token used by services to connect to spa env server |
+| USE_AUDIT_LOGS (boolean)      | turn on the logging mechanism with remote viewing of audit logs |
 | FILE_LOG_LEVEL  (string)      | log level for local log file, defaults to 'info' |
 | LOG_DIR_NAME  (string)        | Directory path to store local log files - typically local PV mount point, ie. /var/logs |
 | MONITOR_USERNAME  (string)    | username for the /monitor REST endpoint to view and download local logs |
