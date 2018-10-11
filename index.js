@@ -263,7 +263,15 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
 
                 var afterStart = now.isAfter(startDate);
                 var beforeEnd = now.isBefore(endDate);
-                return (afterStart && beforeEnd);
+                if (afterStart && beforeEnd) {
+                    if (USE_AUDIT_LOGS) {
+                        winstonLogger.info('In maintenance window now(' + now + ') start(' + startDate + ') end(' + endDate + ')');
+                    }
+                    return true;
+                }
+                else if (USE_AUDIT_LOGS) {
+                    winstonLogger.debug('Outside maintenance window now(' + now + ') start(' + startDate + ') end(' + endDate + ')');
+                }
             }
         }
     }
