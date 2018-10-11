@@ -9,7 +9,8 @@ const express = require('express')
 const app = express();
 const fs = require('fs');
 const serveIndex = require('serve-index');
-const basicAuth = require('express-basic-auth')
+const basicAuth = require('express-basic-auth');
+const moment = require('moment-timezone');
 
 /*=============================================
 =      Environment Variable Configuration     =
@@ -133,6 +134,7 @@ if (USE_AUDIT_LOGS) {
     }));
 }
 
+// startup
 app.use(function (err, req, res, next) {
     if (USE_AUDIT_LOGS)
         winstonLogger.info(err, req);
@@ -182,8 +184,12 @@ var getSPAEnvValue = function (req) {
             // 1. A single env names with a name starting with SPA_ENV_
             // 2. A json collection of env names with each name starting with SPA_ENV_
             if (envName && envName.length > 8 && envName.substring(0, 8) === 'SPA_ENV_') {
-                if (! isEmpty(process.env[envName]))
-                    resolve(process.env[envName]);
+                if (! isEmpty(process.env[envName])) {
+                    if (isEnvMaintenanceFlag(envName))
+                        resolve(stringify(isInMaintenance(envName)));
+                    else
+                        resolve(process.env[envName]);
+                }
                 else
                     reject('Forbidden');
             }
@@ -191,9 +197,13 @@ var getSPAEnvValue = function (req) {
                 // json
                 var keys = JSON.parse(envName);
                 for (var key in keys) {
-                    if (keys.hasOwnProperty(key) && key.length > 8 && key.substring(0, 8) === 'SPA_ENV_') {
-                        if (! isEmpty(process.env[key]))
-                            keys[key] = process.env[key];
+                    if (keys.hasOwnProperty(key) && key.ing(0, 8) === 'SPA_ENV_') {
+                        if (! isEmpty(process.env[key])) {
+                            if (isEnvMaintenanceFlag(key))
+                                keys[key] = stringify(isInMaintenance(key));
+                            else
+                                keys[key] = process.env[key];
+                        }
                     }
                 }
                 resolve (keys);
@@ -217,11 +227,50 @@ var getSPAEnvValue = function (req) {
 
 exports.getSPAEnvValue = getSPAEnvValue;
 
-
+// utility function to see if something is set to true
 function checkEnvBoolean(env){
     return env && env.toLowerCase() === 'true';
 }
 
+// utility function to see if something is empty
 function isEmpty(value) {
     return typeof value == 'string' && !value.trim() || typeof value == 'undefined' || value == null || value === '';
+}
+
+// special case : time calculations for maintenance windows
+// if the environment variables SPA_ENV_XXX_MAINTENANCE_START and SPA_ENV_XXX_MAINTENANCE_END
+// are presents, given the name SPA_ENV_XXX_MAINTENANCE_FLAG, we calculate to see if now is between
+// start and end time and return a boolean to that effect
+
+function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE_FLAG
+    var arr = envName.split("_");
+
+    if (arr[0] === 'SPA' && arr[1] === 'ENV' && arr[3] === 'MAINTENANCE' && arr[4] === 'FLAG') {
+
+        // find start moment
+        var startEnv = 'SPA_ENV_' + arr[2] + '_MAINTENANCE_START';
+        if (! isEmpty(process.env[startEnv])) {
+
+            // find end moment
+            var endEnv = 'SPA_ENV_' + arr[2] + '_MAINTENANCE_END';
+            if (!isEmpty(process.env[endEnv])) {
+
+                var startDate = moment(process.env[startEnv]).tz('America/Vancouver');
+                var endDate = moment(process.env[endEnv]).tz('America/Vancouver');
+
+                // from the prefix get start and end times
+                var now = moment().tz('Etc/UTC');  // will be in UTC
+
+                var afterStart = now.isAfter(startDate);
+                var beforeEnd = now.isBefore(endDate);
+                return (afterStart && beforeEnd);
+            }
+        }
+    }
+    return false;
+}
+
+function isEnvMaintenanceFlag (envName) {
+    var arr = envName.split("_");
+    return (arr[0] === 'SPA' && arr[1] === 'ENV' && arr[3] === 'MAINTENANCE' && arr[4] === 'FLAG');
 }
