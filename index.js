@@ -259,7 +259,7 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
                 var endDate = moment(process.env[endEnv]).tz('America/Vancouver');
 
                 // from the prefix get start and end times
-                var now = moment().tz('America/Vancouver');  // will be in UTC
+                var now = moment().tz('Etc/UTC');  // will be in UTC
 
                 var afterStart = now.isAfter(startDate);
                 var beforeEnd = now.isBefore(endDate);
