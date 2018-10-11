@@ -259,18 +259,18 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
                 var endDate = moment(process.env[endEnv]).tz('America/Vancouver');
 
                 // from the prefix get start and end times
-                var now = moment().tz('Etc/UTC');  // will be in UTC
+                var now = moment().tz('America/Vancouver');  // will be in UTC
 
                 var afterStart = now.isAfter(startDate);
                 var beforeEnd = now.isBefore(endDate);
                 if (afterStart && beforeEnd) {
                     if (USE_AUDIT_LOGS) {
-                        winstonLogger.info('In maintenance window now(' + now + ') start(' + startDate + ') end(' + endDate + ')');
+                        winstonLogger.info('In maintenance window now(' + now.format() + ') start(' + startDate.format() + ') end(' + endDate.format() + ')');
                     }
                     return true;
                 }
                 else if (USE_AUDIT_LOGS) {
-                    winstonLogger.debug('Outside maintenance window now(' + now + ') start(' + startDate + ') end(' + endDate + ')');
+                    winstonLogger.debug('Outside maintenance window now(' + now.format() + ') start(' + startDate.format() + ') end(' + endDate.format() + ')');
                 }
             }
         }

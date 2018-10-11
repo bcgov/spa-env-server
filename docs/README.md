@@ -62,6 +62,15 @@ To view and download local log files created by the server, go to URL of the rou
 
 The username and password should match the environment variables configured.
 
+Special case:
+
+To support Server calculated Maintenance windows, you can provide two environmental variables for a start and end time.  Their name format should be:
+SPA_ENV_XXX_MAINTENANCE_START
+SPA_ENV_XXX_MAINTENANCE_END
+where XXX is an application name (to support multiple applications centrally).
+
+Now when you request for SPA_ENV_XXX_MAINTENANCE_FLAG, it will calculate the current Server time in UTC and see if it falls between those two values (START and END) in 'PDT' timezone.  It will return true if you are in a maintenance window.
+
 ## Production Setup
 
 See [Deploy to OpenShift](openshift/README.md) docs.
