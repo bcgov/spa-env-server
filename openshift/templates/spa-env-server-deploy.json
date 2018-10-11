@@ -89,6 +89,10 @@
                     "value": "${SERVICE_AUTH_TOKEN}"
                   },
                   {
+                    "name": "USE_AUDIT_LOGS",
+                    "value": "${USE_AUDIT_LOGS}"
+                  },
+                  {
                     "name": "LOG_DIR_NAME",
                     "value": "${LOG_DIR_NAME}"
                   },
@@ -129,19 +133,19 @@
                 }
               }
             ],
-	    "volumes": [
-	      {
-	        "name": "spa-env-log",
-	        "persistentVolumeClaim": {
-		  "claimName": "spa-env-log"
-	        }
+	        "volumes": [
+	          {
+	            "name": "spa-env-log",
+	            "persistentVolumeClaim": {
+		          "claimName": "spa-env-log"
+	            }
               }
-	    ],
+	        ],
             "dnsPolicy": "ClusterFirst",
             "restartPolicy": "Always",
             "securityContext": {
             },
-            "terminationGracePeriodSeconds": 30,
+            "terminationGracePeriodSeconds": 30
           }
         },
         "test": false,
@@ -281,6 +285,13 @@
       "name": "SERVICE_AUTH_TOKEN",
       "required": true,
       "value": ""
+    },
+    {
+      "description": "Use Audit logs",
+      "displayName": "USE_AUDIT_LOGS",
+      "name": "USE_AUDIT_LOGS",
+      "required": true,
+      "value": "false"
     },
     {
       "description": "Directory and name of File logs (will be prepended with day's date",
