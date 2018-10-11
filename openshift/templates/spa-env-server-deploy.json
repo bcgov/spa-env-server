@@ -68,7 +68,7 @@
 		"volumeMounts": [
 		  {
 		    "mountPath": "/var/logs",
-		    "name": "spa-env-local-log"
+		    "name": "spa-env-log"
 		  }
 		],
                 "env": [
