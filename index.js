@@ -106,7 +106,7 @@ if (args.length == 3 && args[2] == 'server') {
             winstonLogger.info('START SPA Env Server host(' + HOST_NAME
             + ') loglevel(' + FILE_LOG_LEVEL + ') fileLocation(' + FILE_LOG_NAME
             + ') serverTime(' + moment.tz(now, SERVER_TIMEZONE).format() + ') serverTZ(' + SERVER_TIMEZONE
-            + ') localTime(' + moment.tz(now, LOCAL_TIMEZONE).format() + ') localTZ(' + LOCAL_TIMEZOME + ')');
+            + ') currentTime(' + moment.tz(now, CURRENT_TIMEZONE).format() + ') currentTZ(' + CURRENT_TIMEZONE + ')');
         }
     });
 }
