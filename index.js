@@ -36,6 +36,10 @@ const FILE_LOG_NAME = LOG_DIR_NAME ?
     LOG_DIR_NAME + '/spaenv' + (APPEND_POD_NAME_TO_FILE ? '-' + HOST_NAME : '') + '.log'
     : './logs/spaenv' + (APPEND_POD_NAME_TO_FILE ? '-' + HOST_NAME : '') + '.log';
 
+// for time calculations
+const SERVER_TIMEZONE = process.env.SERVER_TIMEZONE || "Etc/UTC";
+const CURRENT_TIMEZONE = process.env.CURRENT_TIMEZONE || "America/Vancouver"
+
 
 /*=============================================
 =            APPLICATION CONFIGURATION        =
@@ -97,9 +101,13 @@ if (args.length == 3 && args[2] == 'server') {
     var server = app.listen(SERVICE_PORT, SERVICE_IP, function() {
         var host = server.address().address;
         var port = server.address().port;
-        if (USE_AUDIT_LOGS)
+        if (USE_AUDIT_LOGS) {
+            var now = new Date;
             winstonLogger.info('START SPA Env Server host(' + HOST_NAME
-            + ') loglevel(' + FILE_LOG_LEVEL + ') fileLocation(' + FILE_LOG_NAME + ')');
+            + ') loglevel(' + FILE_LOG_LEVEL + ') fileLocation(' + FILE_LOG_NAME
+            + ') serverTime(' + moment.tz(now, SERVER_TIMEZOME).format() + ') serverTZ(' + SERVER_TIMEZONE
+            + ') localTime(' + moment.tz(now, LOCAL_TIMEZONE).format() + ') localTZ(' + LOCAL_TIMEZOME + ')');
+        }
     });
 }
 
