@@ -37,8 +37,8 @@ const FILE_LOG_NAME = LOG_DIR_NAME ?
     : './logs/spaenv' + (APPEND_POD_NAME_TO_FILE ? '-' + HOST_NAME : '') + '.log';
 
 // for time calculations
-const SERVER_TIMEZONE = process.env.SERVER_TIMEZONE || "Etc/UTC";
-const CURRENT_TIMEZONE = process.env.CURRENT_TIMEZONE || "America/Vancouver"
+const CURRENT_TIMEZONE = process.env.CURRENT_TIMEZONE || "America/Vancouver";
+const TIME_FORMAT = process.env.TIME_FORMAT || "YYYY-MM-DD h:mm:ss A";
 
 
 /*=============================================
@@ -102,11 +102,12 @@ if (args.length == 3 && args[2] == 'server') {
         var host = server.address().address;
         var port = server.address().port;
         if (USE_AUDIT_LOGS) {
-            var now = new Date;
+            var now = moment.tz();
+            var lnow = now.zone(CURRENT_TIMEZONE);
             winstonLogger.info('START SPA Env Server host(' + HOST_NAME
             + ') loglevel(' + FILE_LOG_LEVEL + ') fileLocation(' + FILE_LOG_NAME
-            + ') serverTime(' + moment.tz(now, SERVER_TIMEZONE).format() + ') serverTZ(' + SERVER_TIMEZONE
-            + ') currentTime(' + moment.tz(now, CURRENT_TIMEZONE).format() + ') currentTZ(' + CURRENT_TIMEZONE + ')');
+            + ') serverTime(' + now.format(TIME_FORMAT)
+            + ') localTime(' + lnow.format(TIME_FORMAT) + ')');
         }
     });
 }
@@ -161,7 +162,7 @@ var getSPAEnvValue = function (req) {
         };
         if (authorized || !USE_AUTH) {
             // extract stuff
-            const envName = req.get('SPA_ENV_NAME');
+            const envName = req.get('SPA_ENV_NAME') || req.get('spa_env_name');
 
             if (USE_AUDIT_LOGS) {
                 const host = req.get('host') || '?';
@@ -191,7 +192,7 @@ var getSPAEnvValue = function (req) {
             // there are two cases:
             // 1. A single env names with a name starting with SPA_ENV_
             // 2. A json collection of env names with each name starting with SPA_ENV_
-            if (envName && envName.length > 8 && envName.substring(0, 8) === 'SPA_ENV_') {
+            if (envName && envName.length > 8 && envName.substring(0, 8).toUpperCase() === 'SPA_ENV_') {
                 if (! isEmpty(process.env[envName])) {
                     if (isEnvMaintenanceFlag(envName))
                         resolve(stringify(isInMaintenance(envName)));
@@ -205,7 +206,7 @@ var getSPAEnvValue = function (req) {
                 // json
                 var keys = JSON.parse(envName);
                 for (var key in keys) {
-                    if (keys.hasOwnProperty(key) && key.ing(0, 8) === 'SPA_ENV_') {
+                    if (keys.hasOwnProperty(key) && key.ing(0, 8).toUpperCase() === 'SPA_ENV_') {
                         if (! isEmpty(process.env[key])) {
                             if (isEnvMaintenanceFlag(key))
                                 keys[key] = stringify(isInMaintenance(key));
@@ -263,22 +264,25 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
             var endEnv = 'SPA_ENV_' + arr[2] + '_MAINTENANCE_END';
             if (!isEmpty(process.env[endEnv])) {
 
-                var startDate = moment(process.env[startEnv]).tz('America/Vancouver');
-                var endDate = moment(process.env[endEnv]).tz('America/Vancouver');
+
+                var startDate = moment.tz(process.env[startEnv], TIME_FORMAT, CURRENT_TIMEZONE).utc();
+                var endDate = moment.tz(process.env[endEnv], TIME_FORMAT, CURRENT_TIMEZONE).utc();
 
                 // from the prefix get start and end times
-                var now = moment().tz('Etc/UTC');  // will be in UTC
+                var now = moment.tz();  // will be in UTC
 
                 var afterStart = now.isAfter(startDate);
                 var beforeEnd = now.isBefore(endDate);
                 if (afterStart && beforeEnd) {
                     if (USE_AUDIT_LOGS) {
-                        winstonLogger.info('In maintenance window now(' + now.format() + ') start(' + startDate.format() + ') end(' + endDate.format() + ')');
+                        winstonLogger.info('In maintenance window now(' + now.format(TIME_FORMAT) + ') start(' + startDate.format(TIME_FORMAT) + ') end(' + endDate.format(TIME_FORMAT) + ')');
+                        winstonLogger.info('In maintenance window localNow(' + now.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localStart(' + startDate.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localEnd(' + endDate.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ')');
                     }
                     return true;
                 }
                 else if (USE_AUDIT_LOGS) {
                     winstonLogger.debug('Outside maintenance window now(' + now.format() + ') start(' + startDate.format() + ') end(' + endDate.format() + ')');
+                    winstonLogger.debug('Outside maintenance window localNow(' + now.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localStart(' + startDate.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localEnd(' + endDate.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ')');
                 }
             }
         }
