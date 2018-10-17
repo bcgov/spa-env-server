@@ -161,9 +161,11 @@ var getSPAEnvValue = function (req) {
             authorized = true;
         };
         if (authorized || !USE_AUTH) {
-            // extract stuff
+            // required env name
             const envName = req.get('SPA_ENV_NAME') || req.get('spa_env_name');
 
+            // For auditing unauthorized access
+            var logString = '';
             if (USE_AUDIT_LOGS) {
                 const host = req.get('host') || '?';
                 const logsource = req.get('logsource') || '?';
@@ -178,14 +180,11 @@ var getSPAEnvValue = function (req) {
                 const severity = req.get('severity') || '?';
                 const severityLabel = req.get('severity_label') || '?';
 
-                const logString = 'program(' + program + ') envName(' + envName
+                logString = 'program(' + program + ') envName(' + envName
                 + ') host(' + host + ') logsource(' + logsource + ') fhost(' + fhost
                 + ') severity(' + severity + ') method(' + method + ') times(' + times
                 + ') browser(' + browser + ') sourceIP(' + ip + ') http_host(' + http_host
                 + ') http_x_forwarded_for(' + forwarded + ') pod(' + HOST_NAME + ')';
-
-                // write to local filesystem
-                winstonLogger.info(logString);
             }
 
             // get the environment variable requested
@@ -199,8 +198,10 @@ var getSPAEnvValue = function (req) {
                     else
                         resolve(process.env[envName]);
                 }
-                else
+                else {
                     reject('Forbidden');
+                    winstonLogger.info('Forbidden: ' + logString);
+                }
             }
             else if (envName && envName.length > 10 && envName.substring(0, 1) === '{') {
                 // json
@@ -217,19 +218,21 @@ var getSPAEnvValue = function (req) {
                 }
                 resolve (keys);
             }
-            else
+            else {
                 reject('Forbidden');
+                winstonLogger.info(' Forbidden: ' + logString);
+            }
         }
         else {
             if (USE_AUDIT_LOGS) {
-                winstonLogger.info('unauthorized');
+                winstonLogger.info('Unauthorized: ' + logString);
                 winstonLogger.debug('received with headers: ', req.headers);
             }
             reject('Forbidden');
         }
     }, function(err) {
         if (USE_AUDIT_LOGS)
-            winstonLogger.info('error: ' + err);
+            winstonLogger.error('error: ' + err);
         reject('Forbidden');
     });
 };
@@ -254,14 +257,14 @@ function isEmpty(value) {
 function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE_FLAG
     var arr = envName.split("_");
 
-    if (arr[0] === 'SPA' && arr[1] === 'ENV' && arr[3] === 'MAINTENANCE' && arr[4] === 'FLAG') {
+    if (arr[0].toUpperCase() === 'SPA' && arr[1].toUpperCase() === 'ENV' && arr[3].toUpperCase() === 'MAINTENANCE' && arr[4].toUpperCase() === 'FLAG') {
 
         // find start moment
-        var startEnv = 'SPA_ENV_' + arr[2] + '_MAINTENANCE_START';
+        var startEnv = 'SPA_ENV_' + arr[2].toUpperCase() + '_MAINTENANCE_START';
         if (! isEmpty(process.env[startEnv])) {
 
             // find end moment
-            var endEnv = 'SPA_ENV_' + arr[2] + '_MAINTENANCE_END';
+            var endEnv = 'SPA_ENV_' + arr[2].toUpperCase() + '_MAINTENANCE_END';
             if (!isEmpty(process.env[endEnv])) {
 
 
@@ -275,7 +278,7 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
                 var beforeEnd = now.isBefore(endDate);
                 if (afterStart && beforeEnd) {
                     if (USE_AUDIT_LOGS) {
-                        winstonLogger.info('In maintenance window now(' + now.format(TIME_FORMAT) + ') start(' + startDate.format(TIME_FORMAT) + ') end(' + endDate.format(TIME_FORMAT) + ')');
+                        winstonLogger.debug('In maintenance window now(' + now.format(TIME_FORMAT) + ') start(' + startDate.format(TIME_FORMAT) + ') end(' + endDate.format(TIME_FORMAT) + ')');
                    }
                     return true;
                 }
@@ -290,5 +293,5 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
 
 function isEnvMaintenanceFlag (envName) {
     var arr = envName.split("_");
-    return (arr[0] === 'SPA' && arr[1] === 'ENV' && arr[3] === 'MAINTENANCE' && arr[4] === 'FLAG');
+    return (arr[0].toUpperCase() === 'SPA' && arr[1].toUpperCase() === 'ENV' && arr[3].toUpperCase() === 'MAINTENANCE' && arr[4].toUpperCase() === 'FLAG');
 }
