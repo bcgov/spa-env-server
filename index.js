@@ -207,7 +207,7 @@ var getSPAEnvValue = function (req) {
                 // json
                 var keys = JSON.parse(envName);
                 for (var key in keys) {
-                    if (keys.hasOwnProperty(key) && key.ing(0, 8).toUpperCase() === 'SPA_ENV_') {
+                    if (keys.hasOwnProperty(key) && key.substring(0, 8).toUpperCase() === 'SPA_ENV_') {
                         if (! isEmpty(process.env[key])) {
                             if (isEnvMaintenanceFlag(key))
                                 keys[key] = stringify(isInMaintenance(key));
@@ -293,5 +293,5 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
 
 function isEnvMaintenanceFlag (envName) {
     var arr = envName.split("_");
-    return (arr[0].toUpperCase() === 'SPA' && arr[1].toUpperCase() === 'ENV' && arr[3].toUpperCase() === 'MAINTENANCE' && arr[4].toUpperCase() === 'FLAG');
+    return (arr.length > 3 && arr[0].toUpperCase() === 'SPA' && arr[1].toUpperCase() === 'ENV' && arr[3].toUpperCase() === 'MAINTENANCE' && arr[4].toUpperCase() === 'FLAG');
 }
