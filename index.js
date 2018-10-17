@@ -103,7 +103,7 @@ if (args.length == 3 && args[2] == 'server') {
         var port = server.address().port;
         if (USE_AUDIT_LOGS) {
             var now = moment.tz();
-            var lnow = now.zone(CURRENT_TIMEZONE);
+            var lnow = now.tz(CURRENT_TIMEZONE);
             winstonLogger.info('START SPA Env Server host(' + HOST_NAME
             + ') loglevel(' + FILE_LOG_LEVEL + ') fileLocation(' + FILE_LOG_NAME
             + ') serverTime(' + now.format(TIME_FORMAT)
@@ -265,11 +265,11 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
             if (!isEmpty(process.env[endEnv])) {
 
 
-                var startDate = moment.tz(process.env[startEnv], TIME_FORMAT).tz(CURRENT_TIMEZONE);
-                var endDate = moment.tz(process.env[endEnv], TIME_FORMAT).tz(CURRENT_TIMEZONE);
+                var startDate = moment.tz(process.env[startEnv], TIME_FORMAT, CURRENT_TIMEZONE);
+                var endDate = moment.tz(process.env[endEnv], TIME_FORMAT, CURRENT_TIMEZONE);
 
                 // from the prefix get start and end times
-                var now = moment.tz(CURRENT_TIMEZONE);  // will be in UTC
+                var now = moment.tz(CURRENT_TIMEZONE);
 
                 var afterStart = now.isAfter(startDate);
                 var beforeEnd = now.isBefore(endDate);
