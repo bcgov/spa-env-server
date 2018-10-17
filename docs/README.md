@@ -65,11 +65,13 @@ The username and password should match the environment variables configured.
 Special case:
 
 To support Server calculated Maintenance windows, you can provide two environmental variables for a start and end time.  Their name format should be:
-SPA_ENV_XXX_MAINTENANCE_START
-SPA_ENV_XXX_MAINTENANCE_END
-where XXX is an application name (to support multiple applications centrally).
+| TIME_FORMAT    | default is "YYYY-MM-DD h:mm:ss A" ie. "2018-10-17 11:56:00 AM" |
+| CURRENT_TIMEZONE   | default is "America/Vancouver" |
+| SPA_ENV_XXX_MAINTENANCE_START  | in the TIME_FORMAT and CURRENT_TIMEZONE |
+| SPA_ENV_XXX_MAINTENANCE_END    | in the TIME_FORMAT and CURRENT_TIMEZONE |
+(where XXX is an application name  to support multiple applications centrally).
 
-Now when you request for SPA_ENV_XXX_MAINTENANCE_FLAG, it will calculate the current Server time in UTC and see if it falls between those two values (START and END) in 'PDT' timezone.  It will return true if you are in a maintenance window.
+When you request for SPA_ENV_XXX_MAINTENANCE_FLAG, it will calculate the current Server time in UTC and see if it falls between those two values (START and END) in the specified CURRENT_TIMEZONE.  It will return true if you are in a maintenance window.
 
 ## Production Setup
 
