@@ -119,6 +119,30 @@
                   {
                     "name": "MAX_BYTE_SIZE_PER_FILE",
                     "value": "${MAX_BYTE_SIZE_PER_FILE}"
+                  },
+                  {
+                    "name": "TIME_FORMAT",
+                    "value": "${TIME_FORMAT}"
+                  },
+                  {
+                    "name": "CURRENT_TIMEZONE",
+                    "value": "${CURRENT_TIMEZONE}"
+                  },
+                  {
+                    "name": "SPA_ENV_MSP_MAINTENANCE_FLAG",
+                    "value": "${SPA_ENV_MSP_MAINTENANCE_FLAG}"
+                  },
+                  {
+                    "name": "SPA_ENV_MSP_MAINTENANCE_START",
+                    "value": "${SPA_ENV_MSP_MAINTENANCE_START}"
+                  },
+                  {
+                    "name": "SPA_ENV_MSP_MAINTENANCE_END",
+                    "value": "${SPA_ENV_MSP_MAINTENANCE_END}"
+                  },
+                  {
+                    "name": "SPA_ENV_MSP_MAINTENANCE_MESSAGE",
+                    "value": "${SPA_ENV_MSP_MAINTENANCE_MESSAGE}"
                   }
                 ],
                 "resources": {
@@ -339,6 +363,48 @@
       "name": "MAX_BYTE_SIZE_PER_FILE",
       "required": true,
       "value": "78643200"
+    },
+    {
+      "description": "Format of DateTime specified for Maintenance tasks",
+      "displayName": "TIME_FORMAT",
+      "name": "TIME_FORMAT",
+      "required": false,
+      "value": "YYYY-MM-DD h:mm:ss A"
+    },
+    {
+      "description": "The Current Local Timezone, ie. PDT",
+      "displayName": "CURRENT_TIMEZONE",
+      "name": "CURRENT_TIMEZONE",
+      "required": false,
+      "value": "America/Vancouver"
+    },
+    {
+      "description": "Placeholder for the Calculated Maintenance flag based on start and end times",
+      "displayName": "SPA_ENV_MSP_MAINTENANCE_FLAG",
+      "name": "SPA_ENV_MSP_MAINTENANCE_FLAG",
+      "required": false,
+      "value": "false"
+    },
+    {
+      "description": "Start time for maintenance window in the specified Time Format and for the specified Current Local Timezone",
+      "displayName": "SPA_ENV_MSP_MAINTENANCE_START",
+      "name": "SPA_ENV_MSP_MAINTENANCE_START",
+      "required": false,
+      "value": ""
+    },
+    {
+      "description": "End time for maintenance window in the specified Time Format and for the specified Current Local Timezone",
+      "displayName": "SPA_ENV_MSP_MAINTENANCE_END",
+      "name": "SPA_ENV_MSP_MAINTENANCE_END",
+      "required": false,
+      "value": ""
+    },
+    {
+      "description": "Maintenance message to be displayed",
+      "displayName": "SPA_ENV_MSP_MAINTENANCE_MESSAGE",
+      "name": "SPA_ENV_MSP_MAINTENANCE_MESSAGE",
+      "required": false,
+      "value": "System will be done from time A to time B"
     }
   ]
 }
