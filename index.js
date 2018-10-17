@@ -265,24 +265,24 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
             if (!isEmpty(process.env[endEnv])) {
 
 
-                var startDate = moment.tz(process.env[startEnv], TIME_FORMAT, CURRENT_TIMEZONE).utc();
-                var endDate = moment.tz(process.env[endEnv], TIME_FORMAT, CURRENT_TIMEZONE).utc();
+                var startDate = moment.tz(process.env[startEnv], TIME_FORMAT, CURRENT_TIMEZONE);
+                var endDate = moment.tz(process.env[endEnv], TIME_FORMAT, CURRENT_TIMEZONE);
 
                 // from the prefix get start and end times
                 var now = moment.tz();  // will be in UTC
 
-                var afterStart = now.isAfter(startDate);
-                var beforeEnd = now.isBefore(endDate);
+                var afterStart = now.isAfter(startDate.utc());
+                var beforeEnd = now.isBefore(endDate.utc());
                 if (afterStart && beforeEnd) {
                     if (USE_AUDIT_LOGS) {
-                        winstonLogger.info('In maintenance window now(' + now.format(TIME_FORMAT) + ') start(' + startDate.format(TIME_FORMAT) + ') end(' + endDate.format(TIME_FORMAT) + ')');
-                        winstonLogger.info('In maintenance window localNow(' + now.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localStart(' + startDate.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localEnd(' + endDate.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ')');
+                        winstonLogger.info('In maintenance window now(' + now.format(TIME_FORMAT) + ') start(' + startDate.utc().format(TIME_FORMAT) + ') end(' + endDate.utc().format(TIME_FORMAT) + ')');
+                        winstonLogger.info('In maintenance window localNow(' + now.tz(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localStart(' + startDate.format(TIME_FORMAT) + ') localEnd(' + endDate.format(TIME_FORMAT) + ')');
                     }
                     return true;
                 }
                 else if (USE_AUDIT_LOGS) {
-                    winstonLogger.debug('Outside maintenance window now(' + now.format() + ') start(' + startDate.format() + ') end(' + endDate.format() + ')');
-                    winstonLogger.debug('Outside maintenance window localNow(' + now.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localStart(' + startDate.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localEnd(' + endDate.zone(CURRENT_TIMEZONE).format(TIME_FORMAT) + ')');
+                    winstonLogger.debug('Outside maintenance window now(' + now.format() + ') start(' + startDate.utc().format() + ') end(' + endDate.utc().format() + ')');
+                    winstonLogger.debug('Outside maintenance window localNow(' + now.tz(CURRENT_TIMEZONE).format(TIME_FORMAT) + ') localStart(' + startDate.format(TIME_FORMAT) + ') localEnd(' + endDate.format(TIME_FORMAT) + ')');
                 }
             }
         }
