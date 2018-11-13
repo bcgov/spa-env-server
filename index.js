@@ -255,36 +255,50 @@ function isEmpty(value) {
 // start and end time and return a boolean to that effect
 
 function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE_FLAG
-    var arr = envName.split("_");
+    let arr = envName.split("_");
 
     if (arr[0].toUpperCase() === 'SPA' && arr[1].toUpperCase() === 'ENV' && arr[3].toUpperCase() === 'MAINTENANCE' && arr[4].toUpperCase() === 'FLAG') {
 
         // find start moment
-        var startEnv = 'SPA_ENV_' + arr[2].toUpperCase() + '_MAINTENANCE_START';
-        if (! isEmpty(process.env[startEnv])) {
-
+        let startEnv = 'SPA_ENV_' + arr[2].toUpperCase() + '_MAINTENANCE_START';
+        if (isEmpty(process.env[startEnv])) {
+            winstonLogger.error('isInMaintenance error: startEnv(' + startEnv + ') not configured');
+            return false;
+        }
+        else {
             // find end moment
-            var endEnv = 'SPA_ENV_' + arr[2].toUpperCase() + '_MAINTENANCE_END';
-            if (!isEmpty(process.env[endEnv])) {
-
-
-                var startDate = moment.tz(process.env[startEnv], TIME_FORMAT, CURRENT_TIMEZONE);
-                var endDate = moment.tz(process.env[endEnv], TIME_FORMAT, CURRENT_TIMEZONE);
-
-                // from the prefix get start and end times
-                var now = moment.tz(CURRENT_TIMEZONE);
-
-                var afterStart = now.isAfter(startDate);
-                var beforeEnd = now.isBefore(endDate);
-                if (afterStart && beforeEnd) {
-                    if (USE_AUDIT_LOGS) {
-                        winstonLogger.debug('In maintenance window now(' + now.format(TIME_FORMAT) + ') start(' + startDate.format(TIME_FORMAT) + ') end(' + endDate.format(TIME_FORMAT) + ')');
-                   }
-                    return true;
+            let endEnv = 'SPA_ENV_' + arr[2].toUpperCase() + '_MAINTENANCE_END';
+            if (isEmpty(process.env[endEnv])) {
+                winstonLogger.error('isInMaintenance error: endEnv(' + endEnv + ') not configured');
+                return false;
+            }
+            else {
+                // find the time format
+                let timeFormat = 'SPA_ENV_' + arr[2].toUpperCase() + '_TIME_FORMAT';
+                if (isEmpty(process.env[timeFormat])) {
+                    winstonLogger.error('isInMaintenance error: timeFormat(' + timeFormat + ') not configured');
+                    return false;
                 }
-                else if (USE_AUDIT_LOGS) {
-                    winstonLogger.debug('Outside maintenance window now(' + now.format(TIME_FORMAT) + ') start(' + startDate.format(TIME_FORMAT) + ') end(' + endDate.format(TIME_FORMAT) + ')');
-                 }
+                else {
+                    let curTimeFormat = process.env[timeFormat];
+                    let startDate = moment.tz(process.env[startEnv], curTimeFormat, CURRENT_TIMEZONE);
+                    let endDate = moment.tz(process.env[endEnv], curTimeFormat, CURRENT_TIMEZONE);
+
+                    // from the prefix get start and end times
+                    let now = moment.tz(CURRENT_TIMEZONE);
+
+                    let afterStart = now.isAfter(startDate);
+                    let beforeEnd = now.isBefore(endDate);
+                    if (afterStart && beforeEnd) {
+                        if (USE_AUDIT_LOGS) {
+                            winstonLogger.debug('In maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
+                        }
+                        return true;
+                    }
+                    else if (USE_AUDIT_LOGS) {
+                        winstonLogger.debug('Outside maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
+                    }
+                }
             }
         }
     }

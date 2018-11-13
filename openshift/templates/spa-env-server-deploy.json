@@ -121,10 +121,6 @@
                     "value": "${MAX_BYTE_SIZE_PER_FILE}"
                   },
                   {
-                    "name": "TIME_FORMAT",
-                    "value": "${TIME_FORMAT}"
-                  },
-                  {
                     "name": "CURRENT_TIMEZONE",
                     "value": "${CURRENT_TIMEZONE}"
                   },
@@ -139,6 +135,10 @@
                   {
                     "name": "SPA_ENV_MSP_MAINTENANCE_END",
                     "value": "${SPA_ENV_MSP_MAINTENANCE_END}"
+                  },
+                  {
+                    "name": "SPA_ENV_MSP_TIME_FORMAT",
+                    "value": "${SPA_ENV_MSP_TIME_FORMAT}"
                   },
                   {
                     "name": "SPA_ENV_MSP_MAINTENANCE_MESSAGE",
@@ -365,13 +365,6 @@
       "value": "78643200"
     },
     {
-      "description": "Format of DateTime specified for Maintenance tasks",
-      "displayName": "TIME_FORMAT",
-      "name": "TIME_FORMAT",
-      "required": false,
-      "value": "YYYY-MM-DD h:mm:ss A"
-    },
-    {
       "description": "The Current Local Timezone, ie. PDT",
       "displayName": "CURRENT_TIMEZONE",
       "name": "CURRENT_TIMEZONE",
@@ -398,6 +391,13 @@
       "name": "SPA_ENV_MSP_MAINTENANCE_END",
       "required": false,
       "value": ""
+    },
+    {
+      "description": "Format of DateTime specified for Maintenance tasks",
+      "displayName": "SPA_ENV_MSP_TIME_FORMAT",
+      "name": "SPA_ENV_MSP_TIME_FORMAT",
+      "required": false,
+      "value": "YYYY-MM-DD h:mm:ss A"
     },
     {
       "description": "Maintenance message to be displayed",
