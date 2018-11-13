@@ -287,8 +287,14 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
                     // from the prefix get start and end times
                     let now = moment.tz(CURRENT_TIMEZONE);
 
+                    // if end time is before start time and only times are specified and not dates, then use reverse:
+                    // for example:  start(6pm) end(11am) means that not available between 6pm and 11am.
                     let afterStart = now.isAfter(startDate);
                     let beforeEnd = now.isBefore(endDate);
+                    if (endDate.isBefore(startDate) && curTimeFormat.toUpperCase().startsWith('H')) {
+                        afterStart = now.isAfter(endDate);
+                        beforeEnd = now.isBefore(startDate);
+                    }
                     if (afterStart && beforeEnd) {
                         if (USE_AUDIT_LOGS) {
                             winstonLogger.debug('In maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
