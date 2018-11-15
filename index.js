@@ -295,7 +295,8 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
                     let beforeEnd = now.isBefore(endDate);
                     if (USE_AUDIT_LOGS) {
                         winstonLogger.debug('debug calcs afterStart(' + afterStart + ') beforeEnd(' + beforeEnd + ') endDateBeforeStartDate('
-                        + endDate.isBefore(startDate) + ') curTimeFormatStartsWithH(' + curTimeFormat.toUpperCase().startsWith('H') + ')');
+                        + endDate.isBefore(startDate) + ') curTimeFormatStartsWithH(' + curTimeFormat.toUpperCase().startsWith('H')
+                        + ') now(' + now + ') startDate(' + startDate + ') endDate(' + endDate + ')');
                     }
                     if (endDate.isBefore(startDate) && curTimeFormat.toUpperCase().startsWith('H')) {
                         if (afterStart || beforeEnd) {
