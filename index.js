@@ -290,50 +290,65 @@ function isInMaintenance (envName) {  // envName of form SPA_ENV_XXX_MAINTENANCE
 
                     // this is the case where only times are specified
                     if (endDate.isBefore(startDate) && curTimeFormat.toUpperCase().startsWith('H')) {
-
-                        // get just the timestring
-                        let timestring = moment.tz(CURRENT_TIMEZONE).format(curTimeFormat);
-                        let now = moment.tz(timestring, curTimeFormat, CURRENT_TIMEZONE);
-
-                        let afterStart = now.isAfter(startDate);
-                        let beforeEnd = now.isBefore(endDate);
-                        if (USE_AUDIT_LOGS) {
-                            winstonLogger.debug('debug calcs afterStart(' + afterStart + ') beforeEnd(' + beforeEnd + ') endDateBeforeStartDate('
-                                + endDate.isBefore(startDate) + ') curTimeFormatStartsWithH(' + curTimeFormat.toUpperCase().startsWith('H')
-                                + ') now(' + now + ') startDate(' + startDate + ') endDate(' + endDate + ') timestring(' + timestring + ')');
-                        }
-                        if (afterStart || beforeEnd) {
-                            if (USE_AUDIT_LOGS) {
-                                winstonLogger.debug('In maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
-                            }
-                            return true;
-                        }
+                        return isTimeInMaintenance(startDate, endDate, curTimeFormat);
                     }
                     else {
-                        // from the prefix get start and end times
-                        let now = moment.tz(CURRENT_TIMEZONE);
-                        let afterStart = now.isAfter(startDate);
-                        let beforeEnd = now.isBefore(endDate);
-                        if (USE_AUDIT_LOGS) {
-                            winstonLogger.debug('debug calcs afterStart(' + afterStart + ') beforeEnd(' + beforeEnd + ') endDateBeforeStartDate('
-                                + endDate.isBefore(startDate) + ') curTimeFormatStartsWithH(' + curTimeFormat.toUpperCase().startsWith('H')
-                                + ') now(' + now + ') startDate(' + startDate + ') endDate(' + endDate + ')');
-                        }
-                        if (afterStart && beforeEnd) {
-                            if (USE_AUDIT_LOGS) {
-                                winstonLogger.debug('In maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
-                            }
-                            return true;
-                        }
-                    }
-                    if (USE_AUDIT_LOGS) {
-                        winstonLogger.debug('Outside maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
+                        return isDateInMaintenance(startDate, endDate, curTimeFormat);
                     }
                 }
             }
         }
     }
-    return false;
+}
+
+function isTimeInMaintenance (startDate, endDate, curTimeFormat) {
+    // get just the timestring
+    let timestring = moment.tz(CURRENT_TIMEZONE).format(curTimeFormat);
+    let now = moment.tz(timestring, curTimeFormat, CURRENT_TIMEZONE);
+
+    let afterStart = now.isAfter(startDate);
+    let beforeEnd = now.isBefore(endDate);
+    if (USE_AUDIT_LOGS) {
+        winstonLogger.debug('debug calcs afterStart(' + afterStart + ') beforeEnd(' + beforeEnd + ') endDateBeforeStartDate('
+            + endDate.isBefore(startDate) + ') curTimeFormatStartsWithH(' + curTimeFormat.toUpperCase().startsWith('H')
+            + ') now(' + now + ') startDate(' + startDate + ') endDate(' + endDate + ') timestring(' + timestring + ')');
+    }
+    if (afterStart || beforeEnd) {
+        if (USE_AUDIT_LOGS) {
+            winstonLogger.debug('In maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
+        }
+        return true;
+    }
+    else {
+        if (USE_AUDIT_LOGS) {
+            winstonLogger.debug('Outside maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
+        }
+        return false;
+    }
+}
+
+function isDateInMaintenance (startDate, endDate, curTimeFormat) {
+    // from the prefix get start and end times
+    let now = moment.tz(CURRENT_TIMEZONE);
+    let afterStart = now.isAfter(startDate);
+    let beforeEnd = now.isBefore(endDate);
+    if (USE_AUDIT_LOGS) {
+        winstonLogger.debug('debug calcs afterStart(' + afterStart + ') beforeEnd(' + beforeEnd + ') endDateBeforeStartDate('
+            + endDate.isBefore(startDate) + ') curTimeFormatStartsWithH(' + curTimeFormat.toUpperCase().startsWith('H')
+            + ') now(' + now + ') startDate(' + startDate + ') endDate(' + endDate + ')');
+    }
+    if (afterStart && beforeEnd) {
+        if (USE_AUDIT_LOGS) {
+            winstonLogger.debug('In maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
+        }
+        return true;
+    }
+    else {
+        if (USE_AUDIT_LOGS) {
+            winstonLogger.debug('Outside maintenance window now(' + now.format(curTimeFormat) + ') start(' + startDate.format(curTimeFormat) + ') end(' + endDate.format(curTimeFormat) + ')');
+        }
+        return false;
+    }
 }
 
 function isEnvMaintenanceFlag (envName) {
