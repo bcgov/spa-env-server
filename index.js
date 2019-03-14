@@ -217,7 +217,11 @@ var getSPAEnvValue = function (req) {
                 var keys = JSON.parse(envName);
                 for (var key in keys) {
                     if (keys.hasOwnProperty(key) && key.substring(0, 8).toUpperCase() === 'SPA_ENV_') {
-                        if (! isEmpty(process.env[key])) {
+						if (key && key.length == 11 && key.toUpperCase() === 'SPA_ENV_NOW') {                                                         
+							let timestring = moment.tz(CURRENT_TIMEZONE).format(TIME_FORMAT);
+							keys[key] = timestring;
+						} 
+                        else if (! isEmpty(process.env[key])) {
                             if (isEnvMaintenanceFlag(key))
                                 keys[key] = stringify(isInMaintenance(key));
                             else
