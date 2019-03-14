@@ -195,7 +195,12 @@ var getSPAEnvValue = function (req) {
             // there are two cases:
             // 1. A single env names with a name starting with SPA_ENV_
             // 2. A json collection of env names with each name starting with SPA_ENV_
-            if (envName && envName.length > 8 && envName.substring(0, 8).toUpperCase() === 'SPA_ENV_') {
+            if (envName && envName.length == 11 && envName.toUpperCase() === 'SPA_ENV_NOW') {
+                let timestring = moment.tz(CURRENT_TIMEZONE).format(TIME_FORMAT);
+                resolve (timestring);
+                // let now = moment.tz(timestring, TIME_FORMAT, CURRENT_TIMEZONE);
+            }
+            else if (envName && envName.length > 8 && envName.substring(0, 8).toUpperCase() === 'SPA_ENV_') {
                 if (! isEmpty(process.env[envName])) {
                     if (isEnvMaintenanceFlag(envName))
                         resolve(stringify(isInMaintenance(envName)));
@@ -206,11 +211,6 @@ var getSPAEnvValue = function (req) {
                     reject('Forbidden');
                     winstonLogger.info('Forbidden: ' + logString);
                 }
-            }
-            else if (envName && envName.length > 0 && envName.toUpperCase() === 'SPA_ENV_NOW') {
-                let timestring = moment.tz(CURRENT_TIMEZONE).format(TIME_FORMAT);
-                resolve (timestring);
-                // let now = moment.tz(timestring, TIME_FORMAT, CURRENT_TIMEZONE);
             }
             else if (envName && envName.length > 10 && envName.substring(0, 1) === '{') {
                 // json
