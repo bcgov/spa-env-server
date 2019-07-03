@@ -12,7 +12,9 @@
   "scripts": {
     "prestart": "npm install ; npm install request --save; npm install winston-daily-rotate-file --save; npm install serve-index --save; npm install express-basic-auth --save",
     "start": "node $NODE_DEBUG_OPTION index.js server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
@@ -24,9 +26,11 @@
     "request": "^2.88.0",
     "serve-index": "^1.9.1",
     "winston": "^3.1.0",
-    "winston-daily-rotate-file": "^3.3.3"
+    "winston-daily-rotate-file": "^3.3.3",
+    "snyk": "^1.189.0"
   },
   "engines": {
     "node": ">=8.2.1"
-  }
+  },
+  "snyk": true
 }
