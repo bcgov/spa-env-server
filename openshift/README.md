@@ -1,5 +1,18 @@
 # Deploy to OpenShift
 
+NOTES:
+
+``console
+oc process -f images/nsp-tools.yaml \
+-p NAMESPACE=$(oc project --short) | \
+oc create -f -
+```
+
+``console
+oc process -f openshift/templates/build.yaml | \
+oc apply -f -
+```
+
 ## Build 
 
 A Template is provided in openshift/templates/spa-env-server-build.json.  Use the template in your tools project with conjunction with the openshift/templates/spa-env-server-jenkins.json for the jenkins2 pipeline template. 
