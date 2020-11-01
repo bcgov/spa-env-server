@@ -19,8 +19,6 @@
 
 const gulp = require('gulp');
 const clean = require('gulp-clean');
-const child = require('child_process');
-
 
 gulp.task('clean', () =>
   gulp.src('build', { read: false, allowEmpty: true }).pipe(
@@ -46,9 +44,3 @@ gulp.task(
   )
 );
 
-gulp.task('watch-src-changes', () =>
-  gulp.watch(["src/**/*.{ts,tsx}"],
-    gulp.parallel('transpile-src', 'copy-app-config',
-      'copy-node-config', 'link-env')
-  )
-);
